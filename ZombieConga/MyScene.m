@@ -9,7 +9,7 @@
 #import "MyScene.h"
 #import "MathUtils.h"
 
-static const CGFloat ZOMBIE_MOVE_POINTS_PER_SEC = 120.0;
+static const CGFloat ZOMBIE_MOVE_POINTS_PER_SEC = 120.0f;
 static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
 
 @implementation MyScene
@@ -33,7 +33,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         [self addChild:bg];
         
         _zombie = [SKSpriteNode spriteNodeWithImageNamed:@"zombie1"];
-        _zombie.position = CGPointMake(100, 100);
+        _zombie.position = CGPointMake(100.0f, 100.0f);
         [self addChild:_zombie];
         
         NSMutableArray* textures = [NSMutableArray arrayWithCapacity:10];
@@ -50,10 +50,13 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
             [textures addObject:texture];
         }
         
-        _zombieAnimation = [SKAction animateWithTextures:textures timePerFrame:0.1];
+        _zombieAnimation = [SKAction animateWithTextures:textures timePerFrame:0.1f];
         
         [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction performSelector:@selector(spawnEnemy) onTarget:self],
                                                                            [SKAction waitForDuration:2.0]]]]];
+        
+        [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction performSelector:@selector(spawnCat) onTarget:self],
+                                                                           [SKAction waitForDuration:1.0]]]]];
     }
     
     return self;
@@ -65,7 +68,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         _dt = currentTime - _lastUpdateTime;
     }
     else {
-        _dt = 0;
+        _dt = 0.0;
     }
     
     _lastUpdateTime = currentTime;
@@ -93,6 +96,34 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     SKAction* actionMove = [SKAction moveToX:-enemy.size.width/2 duration:2.0];
     SKAction* actionRemove = [SKAction removeFromParent];
     [enemy runAction:[SKAction sequence:@[actionMove, actionRemove]]];
+}
+
+- (void)spawnCat
+{
+    SKSpriteNode* cat = [SKSpriteNode spriteNodeWithImageNamed:@"cat"];
+    cat.position = CGPointMake(ScalarRandomRange(0.0f, self.size.width),
+                               ScalarRandomRange(0.0f, self.size.height));
+    cat.xScale = 0.0f;
+    cat.yScale = 0.0f;
+    cat.zRotation = -M_PI / 16.0;
+    [self addChild:cat];
+    
+    SKAction* appear = [SKAction scaleTo:1.0f duration:0.5];
+    SKAction* disappear = [SKAction scaleTo:0.0f duration:0.5];
+    SKAction* remove = [SKAction removeFromParent];
+    
+    SKAction* leftWiggle = [SKAction rotateByAngle:M_PI / 8.0 duration:0.5];
+    SKAction* rightWiggle = [leftWiggle reversedAction];
+    SKAction* fullWiggle = [SKAction sequence:@[leftWiggle, rightWiggle]];
+    
+    SKAction* scaleUp = [SKAction scaleBy:1.2f duration:0.25];
+    SKAction* scaleDown = [scaleUp reversedAction];
+    SKAction* fullScale = [SKAction sequence:@[scaleUp, scaleDown, scaleUp, scaleDown]];
+    
+    SKAction* group = [SKAction group:@[fullScale, fullWiggle]];
+    SKAction* groupWait = [SKAction repeatAction:group count:10];
+    
+    [cat runAction:[SKAction sequence:@[appear, groupWait, disappear, remove]]];
 }
 
 - (void)moveSprite:(SKSpriteNode*)sprite velocity:(CGPoint)velocity
