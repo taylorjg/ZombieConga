@@ -11,6 +11,7 @@
 
 static const CGFloat ZOMBIE_MOVE_POINTS_PER_SEC = 120.0f;
 static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
+static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
 
 @implementation MyScene
 {
@@ -37,6 +38,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         
         _zombie = [SKSpriteNode spriteNodeWithImageNamed:@"zombie1"];
         _zombie.position = CGPointMake(100.0f, 100.0f);
+        _zombie.zPosition = 100.0f;
         [self addChild:_zombie];
         
         NSMutableArray* textures = [NSMutableArray arrayWithCapacity:10];
@@ -92,6 +94,8 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         [self rotateSprite:_zombie toFace:_velocity rotateRadiansPerSec:ZOMBIE_ROTATE_RADIANS_PER_SEC];
         [self boundsCheckZombie];
     }
+    
+    [self moveTrain];
 }
 
 - (void)didEvaluateActions
@@ -226,7 +230,12 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     [self enumerateChildNodesWithName:@"cat" usingBlock:^(SKNode* node, BOOL* stop) {
         SKSpriteNode* cat = (SKSpriteNode*)node;
         if (CGRectIntersectsRect(cat.frame, _zombie.frame)) {
-            [cat removeFromParent];
+            cat.name = @"train";
+            cat.xScale = 1.0f;
+            cat.yScale = 1.0f;
+            cat.zRotation = 0.0f;
+            [cat removeAllActions];
+            [cat runAction:[SKAction colorizeWithColor:[UIColor greenColor] colorBlendFactor:0.5f duration:0.2]];
             [self runAction:_catCollisionSound];
         }
     }];
@@ -259,6 +268,24 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         amountToRotate = fabsf(shortest);
     }
     sprite.zRotation += ScalarSign(shortest) * amountToRotate;
+}
+
+- (void)moveTrain
+{
+    __block CGPoint targetPosition = _zombie.position;
+    
+    [self enumerateChildNodesWithName:@"train" usingBlock:^(SKNode* node, BOOL* stop) {
+        if (!node.hasActions) {
+            CGFloat duration = 0.3f;
+            CGPoint offset = CGPointSubtract(targetPosition, node.position);
+            CGPoint direction = CGPointNormalise(offset);
+            CGPoint amoutToMovePerSec = CGPointMultiplyScalar(direction, CAT_MOVE_POINTS_PER_SEC);
+            CGPoint amountToMove = CGPointMultiplyScalar(amoutToMovePerSec, duration);
+            SKAction* moveAction = [SKAction moveByX:amountToMove.x y:amountToMove.y duration:duration];
+            [node runAction:moveAction];
+        }
+        targetPosition = node.position;
+    }];
 }
 
 - (SKAction*)makeBlinkAction
