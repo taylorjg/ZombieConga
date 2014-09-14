@@ -15,6 +15,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
 @implementation MyScene
 {
     SKSpriteNode* _zombie;
+    SKAction* _zombieAnimation;
     NSTimeInterval _lastUpdateTime;
     NSTimeInterval _dt;
     CGPoint _velocity;
@@ -34,6 +35,25 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         _zombie = [SKSpriteNode spriteNodeWithImageNamed:@"zombie1"];
         _zombie.position = CGPointMake(100, 100);
         [self addChild:_zombie];
+        
+        NSMutableArray* textures = [NSMutableArray arrayWithCapacity:10];
+        
+        for (int i = 1; i < 4; i++) {
+            NSString* textureName = [NSString stringWithFormat:@"zombie%d", i];
+            SKTexture* texture = [SKTexture textureWithImageNamed:textureName];
+            [textures addObject:texture];
+        }
+        
+        for (int i = 4; i > 1; i--) {
+            NSString* textureName = [NSString stringWithFormat:@"zombie%d", i];
+            SKTexture* texture = [SKTexture textureWithImageNamed:textureName];
+            [textures addObject:texture];
+        }
+        
+        _zombieAnimation = [SKAction animateWithTextures:textures timePerFrame:0.1];
+        
+        [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction performSelector:@selector(spawnEnemy) onTarget:self],
+                                                                           [SKAction waitForDuration:2.0]]]]];
     }
     
     return self;
@@ -55,6 +75,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     if (distance <= ZOMBIE_MOVE_POINTS_PER_SEC * _dt) {
         _zombie.position = _lastTouchLocation;
         _velocity = CGPointZero;
+        [self stopZombieAnimation];
     }
     else {
         [self moveSprite:_zombie velocity:_velocity];
@@ -63,10 +84,33 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     }
 }
 
+- (void)spawnEnemy
+{
+    SKSpriteNode* enemy = [SKSpriteNode spriteNodeWithImageNamed:@"enemy"];
+    enemy.position = CGPointMake(self.size.width + enemy.size.width/2,
+                                 ScalarRandomRange(enemy.size.height/2, self.size.height - enemy.size.height/2));
+    [self addChild:enemy];
+    SKAction* actionMove = [SKAction moveToX:-enemy.size.width/2 duration:2.0];
+    SKAction* actionRemove = [SKAction removeFromParent];
+    [enemy runAction:[SKAction sequence:@[actionMove, actionRemove]]];
+}
+
 - (void)moveSprite:(SKSpriteNode*)sprite velocity:(CGPoint)velocity
 {
     CGPoint amountToMove = CGPointMultiplyScalar(velocity, _dt);
     sprite.position = CGPointAdd(sprite.position, amountToMove);
+}
+
+- (void)startZombieAnimation
+{
+    if (![_zombie actionForKey:@"animation"]) {
+        [_zombie runAction:[SKAction repeatActionForever:_zombieAnimation] withKey:@"animation"];
+    }
+}
+
+- (void)stopZombieAnimation
+{
+    [_zombie removeActionForKey:@"animation"];
 }
 
 - (void)moveZomebieToward:(CGPoint)location
@@ -74,6 +118,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     CGPoint offset = CGPointSubtract(location, _zombie.position);
     CGPoint direction = CGPointNormalise(offset);
     _velocity = CGPointMultiplyScalar(direction, ZOMBIE_MOVE_POINTS_PER_SEC);
+    [self startZombieAnimation];
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event

@@ -76,3 +76,8 @@ CGFloat ScalarShortestAngleBetween(const CGFloat a, const CGFloat b)
     
     return angle;
 }
+
+CGFloat ScalarRandomRange(const CGFloat min, const CGFloat max)
+{
+    return floorf(((double)arc4random() / 0x100000000) * (max - min) + min);
+}

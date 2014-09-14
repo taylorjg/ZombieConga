@@ -19,3 +19,4 @@ extern CGPoint CGPointFromSize(const CGSize size);
 extern CGFloat ScalarSign(const CGFloat a);
 extern CGFloat ScalarSign(const CGFloat a);
 extern CGFloat ScalarShortestAngleBetween(const CGFloat a, const CGFloat b);
+extern CGFloat ScalarRandomRange(const CGFloat min, const CGFloat max);
