@@ -20,6 +20,8 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     NSTimeInterval _dt;
     CGPoint _velocity;
     CGPoint _lastTouchLocation;
+    SKAction* _catCollisionSound;
+    SKAction* _enemyCollisionSound;
 }
 
 - (id)initWithSize:(CGSize)size
@@ -57,6 +59,9 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         
         [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction performSelector:@selector(spawnCat) onTarget:self],
                                                                            [SKAction waitForDuration:1.0]]]]];
+        
+        _catCollisionSound = [SKAction playSoundFileNamed:@"hitCat.wav" waitForCompletion:NO];
+        _enemyCollisionSound = [SKAction playSoundFileNamed:@"hitCatLady.wav" waitForCompletion:NO];
     }
     
     return self;
@@ -87,11 +92,17 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     }
 }
 
+- (void)didEvaluateActions
+{
+    [self checkCollisions];
+}
+
 - (void)spawnEnemy
 {
     SKSpriteNode* enemy = [SKSpriteNode spriteNodeWithImageNamed:@"enemy"];
     enemy.position = CGPointMake(self.size.width + enemy.size.width/2,
                                  ScalarRandomRange(enemy.size.height/2, self.size.height - enemy.size.height/2));
+    enemy.name = @"enemy";
     [self addChild:enemy];
     SKAction* actionMove = [SKAction moveToX:-enemy.size.width/2 duration:2.0];
     SKAction* actionRemove = [SKAction removeFromParent];
@@ -106,6 +117,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     cat.xScale = 0.0f;
     cat.yScale = 0.0f;
     cat.zRotation = -M_PI / 16.0;
+    cat.name = @"cat";
     [self addChild:cat];
     
     SKAction* appear = [SKAction scaleTo:1.0f duration:0.5];
@@ -205,6 +217,26 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
     
     _zombie.position = newPosition;
     _velocity = newVelocity;
+}
+
+- (void)checkCollisions
+{
+    [self enumerateChildNodesWithName:@"cat" usingBlock:^(SKNode *node, BOOL *stop) {
+        SKSpriteNode* cat = (SKSpriteNode*)node;
+        if (CGRectIntersectsRect(cat.frame, _zombie.frame)) {
+            [cat removeFromParent];
+            [self runAction:_catCollisionSound];
+        }
+    }];
+    
+    [self enumerateChildNodesWithName:@"enemy" usingBlock:^(SKNode *node, BOOL *stop) {
+        SKSpriteNode* enemy = (SKSpriteNode*)node;
+        CGRect smallerFrame = CGRectInset(enemy.frame, 20.0f, 20.0f);
+        if (CGRectIntersectsRect(smallerFrame, _zombie.frame)) {
+            [enemy removeFromParent];
+            [self runAction:_enemyCollisionSound];
+        }
+    }];
 }
 
 - (void)rotateSprite:(SKSpriteNode*)sprite toFace:(CGPoint)direction rotateRadiansPerSec:(CGFloat)rotateRadiansPerSec
