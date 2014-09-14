@@ -16,6 +16,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
 {
     SKSpriteNode* _zombie;
     SKAction* _zombieAnimation;
+    BOOL _zombieIsInvinicible;
     NSTimeInterval _lastUpdateTime;
     NSTimeInterval _dt;
     CGPoint _velocity;
@@ -53,6 +54,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         }
         
         _zombieAnimation = [SKAction animateWithTextures:textures timePerFrame:0.1f];
+        _zombieIsInvinicible = NO;
         
         [self runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction performSelector:@selector(spawnEnemy) onTarget:self],
                                                                            [SKAction waitForDuration:2.0]]]]];
@@ -221,7 +223,7 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
 
 - (void)checkCollisions
 {
-    [self enumerateChildNodesWithName:@"cat" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self enumerateChildNodesWithName:@"cat" usingBlock:^(SKNode* node, BOOL* stop) {
         SKSpriteNode* cat = (SKSpriteNode*)node;
         if (CGRectIntersectsRect(cat.frame, _zombie.frame)) {
             [cat removeFromParent];
@@ -229,14 +231,24 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         }
     }];
     
-    [self enumerateChildNodesWithName:@"enemy" usingBlock:^(SKNode *node, BOOL *stop) {
-        SKSpriteNode* enemy = (SKSpriteNode*)node;
-        CGRect smallerFrame = CGRectInset(enemy.frame, 20.0f, 20.0f);
-        if (CGRectIntersectsRect(smallerFrame, _zombie.frame)) {
-            [enemy removeFromParent];
-            [self runAction:_enemyCollisionSound];
-        }
-    }];
+    if (!_zombieIsInvinicible) {
+        [self enumerateChildNodesWithName:@"enemy" usingBlock:^(SKNode* node, BOOL* stop) {
+            SKSpriteNode* enemy = (SKSpriteNode*)node;
+            CGRect smallerFrame = CGRectInset(enemy.frame, 20.0f, 20.0f);
+            if (CGRectIntersectsRect(smallerFrame, _zombie.frame)) {
+                
+                [self runAction:_enemyCollisionSound];
+                
+                _zombieIsInvinicible = YES;
+                SKAction* blinkAction = [self makeBlinkAction];
+                SKAction* postBlinkAction = [SKAction runBlock:^{
+                    _zombie.hidden = NO;
+                    _zombieIsInvinicible = NO;
+                }];
+                [_zombie runAction:[SKAction sequence:@[blinkAction, postBlinkAction]]];
+            }
+        }];
+    }
 }
 
 - (void)rotateSprite:(SKSpriteNode*)sprite toFace:(CGPoint)direction rotateRadiansPerSec:(CGFloat)rotateRadiansPerSec
@@ -247,6 +259,20 @@ static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
         amountToRotate = fabsf(shortest);
     }
     sprite.zRotation += ScalarSign(shortest) * amountToRotate;
+}
+
+- (SKAction*)makeBlinkAction
+{
+    CGFloat blinkTimes = 10.0f;
+    CGFloat blinkDuration = 3.0f;
+    
+    SKAction* blinkAction = [SKAction customActionWithDuration:blinkDuration actionBlock:^(SKNode* node, CGFloat elapsedTime) {
+        CGFloat slice = blinkDuration / blinkTimes;
+        CGFloat remainder = fmodf(elapsedTime, slice);
+        node.hidden = remainder > slice/2;
+    }];
+    
+    return blinkAction;
 }
 
 @end
