@@ -24,11 +24,16 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     CGPoint _lastTouchLocation;
     SKAction* _catCollisionSound;
     SKAction* _enemyCollisionSound;
+    int _lives;
+    BOOL _gameOver;
 }
 
 - (id)initWithSize:(CGSize)size
 {
     if (self = [super initWithSize:size]) {
+        
+        _lives = 5;
+        _gameOver = NO;
         
         self.backgroundColor = [SKColor whiteColor];
         
@@ -96,6 +101,11 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     }
     
     [self moveTrain];
+    
+    if (_lives <= 0 && !_gameOver) {
+        _gameOver = YES;
+        NSLog(@"You lose!");
+    }
 }
 
 - (void)didEvaluateActions
@@ -248,6 +258,9 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
                 
                 [self runAction:_enemyCollisionSound];
                 
+                [self loseCats];
+                _lives--;
+                
                 _zombieIsInvinicible = YES;
                 SKAction* blinkAction = [self makeBlinkAction];
                 SKAction* postBlinkAction = [SKAction runBlock:^{
@@ -273,8 +286,10 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
 - (void)moveTrain
 {
     __block CGPoint targetPosition = _zombie.position;
+    __block int trainCount = 0;
     
     [self enumerateChildNodesWithName:@"train" usingBlock:^(SKNode* node, BOOL* stop) {
+        trainCount++;
         if (!node.hasActions) {
             CGFloat duration = 0.3f;
             CGPoint offset = CGPointSubtract(targetPosition, node.position);
@@ -285,6 +300,34 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
             [node runAction:moveAction];
         }
         targetPosition = node.position;
+    }];
+    
+    if (trainCount >= 10 && !_gameOver) {
+        _gameOver = YES;
+        NSLog(@"You win!");
+    }
+}
+
+- (void)loseCats
+{
+    __block int loseCount = 0;
+    
+    [self enumerateChildNodesWithName:@"train" usingBlock:^(SKNode* node, BOOL* stop) {
+        
+        CGPoint randomSpot = node.position;
+        randomSpot.x += ScalarRandomRange(-100.0f, 100.0f);
+        randomSpot.y += ScalarRandomRange(-100.0f, 100.0f);
+        
+        node.name = @"";
+        
+        [node runAction:[SKAction sequence:@[[SKAction group:@[[SKAction rotateByAngle:M_PI * 4 duration:1.0],
+                                                               [SKAction moveTo:randomSpot duration:1.0],
+                                                               [SKAction scaleTo:0.0f duration:1.0]]],
+                                             [SKAction removeFromParent]]]];
+        
+        if (++loseCount >= 2) {
+            *stop = YES;
+        }
     }];
 }
 
