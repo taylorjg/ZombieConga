@@ -14,6 +14,12 @@ CGPoint CGRectGetMidPoint(const CGRect rect)
                        CGRectGetMidY(rect));
 }
 
+CGPoint CGSizeGetMidPoint(const CGSize size)
+{
+    return CGPointMake(size.width / 2,
+                       size.height / 2);
+}
+
 CGPoint CGPointAdd(const CGPoint pt1, const CGPoint pt2)
 {
     return CGPointMake(pt1.x + pt2.x,

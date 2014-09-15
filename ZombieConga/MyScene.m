@@ -7,7 +7,10 @@
 //
 
 #import "MyScene.h"
+#import "GameOverScene.h"
 #import "MathUtils.h"
+
+@import AVFoundation;
 
 static const CGFloat ZOMBIE_MOVE_POINTS_PER_SEC = 120.0f;
 static const CGFloat ZOMBIE_ROTATE_RADIANS_PER_SEC = 4 * M_PI;
@@ -26,6 +29,7 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     SKAction* _enemyCollisionSound;
     int _lives;
     BOOL _gameOver;
+    AVAudioPlayer* _backgroundMusicPlayer;
 }
 
 - (id)initWithSize:(CGSize)size
@@ -34,12 +38,14 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
         
         _lives = 5;
         _gameOver = NO;
+        _backgroundMusicPlayer = nil;
         
         self.backgroundColor = [SKColor whiteColor];
         
         SKSpriteNode* bg = [SKSpriteNode spriteNodeWithImageNamed:@"background"];
         bg.position = CGRectGetMidPoint(self.frame);
         [self addChild:bg];
+        [self playBackgroundMusic:@"bgMusic.mp3"];
         
         _zombie = [SKSpriteNode spriteNodeWithImageNamed:@"zombie1"];
         _zombie.position = CGPointMake(100.0f, 100.0f);
@@ -105,6 +111,10 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     if (_lives <= 0 && !_gameOver) {
         _gameOver = YES;
         NSLog(@"You lose!");
+        [self stopBackgroundMusic];
+        SKScene* gameOverScene = [[GameOverScene alloc] initWithSize:self.size won:NO];
+        SKTransition* transition = [SKTransition fadeWithDuration:0.5];
+        [self.view presentScene:gameOverScene transition:transition];
     }
 }
 
@@ -305,6 +315,10 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     if (trainCount >= 10 && !_gameOver) {
         _gameOver = YES;
         NSLog(@"You win!");
+        [self stopBackgroundMusic];
+        SKScene* gameOverScene = [[GameOverScene alloc] initWithSize:self.size won:YES];
+        SKTransition* transition = [SKTransition fadeWithDuration:0.5];
+        [self.view presentScene:gameOverScene transition:transition];
     }
 }
 
@@ -343,6 +357,26 @@ static const CGFloat CAT_MOVE_POINTS_PER_SEC = 120.0f;
     }];
     
     return blinkAction;
+}
+
+- (void)playBackgroundMusic:(NSString*)fileName
+{
+    if (_backgroundMusicPlayer == nil) {
+        NSError* error;
+        NSURL* backgroundMusicUrl = [[NSBundle mainBundle] URLForResource:fileName withExtension:nil];
+        _backgroundMusicPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:backgroundMusicUrl error:&error];
+        _backgroundMusicPlayer.numberOfLoops = -1;
+        [_backgroundMusicPlayer prepareToPlay];
+        [_backgroundMusicPlayer play];
+    }
+}
+
+- (void)stopBackgroundMusic
+{
+    if (_backgroundMusicPlayer) {
+        [_backgroundMusicPlayer stop];
+        _backgroundMusicPlayer = nil;
+    }
 }
 
 @end

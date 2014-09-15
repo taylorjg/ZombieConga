@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		9F3B6EF819C4C47800DEB300 /* MathUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F3B6EF719C4C47800DEB300 /* MathUtils.m */; };
+		9F3B6EFB19C765D000DEB300 /* GameOverScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F3B6EFA19C765D000DEB300 /* GameOverScene.m */; };
+		9F3B6EFE19C76CDC00DEB300 /* MainMenuScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F3B6EFD19C76CDC00DEB300 /* MainMenuScene.m */; };
 		9F7121CE19C46CC700412B22 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7121CD19C46CC700412B22 /* Foundation.framework */; };
 		9F7121D019C46CC700412B22 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7121CF19C46CC700412B22 /* CoreGraphics.framework */; };
 		9F7121D219C46CC700412B22 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7121D119C46CC700412B22 /* UIKit.framework */; };
@@ -64,6 +66,10 @@
 /* Begin PBXFileReference section */
 		9F3B6EF619C4C47800DEB300 /* MathUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
 		9F3B6EF719C4C47800DEB300 /* MathUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MathUtils.m; sourceTree = "<group>"; };
+		9F3B6EF919C765D000DEB300 /* GameOverScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameOverScene.h; sourceTree = "<group>"; };
+		9F3B6EFA19C765D000DEB300 /* GameOverScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameOverScene.m; sourceTree = "<group>"; };
+		9F3B6EFC19C76CDC00DEB300 /* MainMenuScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainMenuScene.h; sourceTree = "<group>"; };
+		9F3B6EFD19C76CDC00DEB300 /* MainMenuScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainMenuScene.m; sourceTree = "<group>"; };
 		9F7121CA19C46CC600412B22 /* ZombieConga.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZombieConga.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F7121CD19C46CC700412B22 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9F7121CF19C46CC700412B22 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -182,6 +188,10 @@
 				9F7121E519C46CC700412B22 /* ViewController.m */,
 				9F7121E719C46CC700412B22 /* MyScene.h */,
 				9F7121E819C46CC700412B22 /* MyScene.m */,
+				9F3B6EFC19C76CDC00DEB300 /* MainMenuScene.h */,
+				9F3B6EFD19C76CDC00DEB300 /* MainMenuScene.m */,
+				9F3B6EF919C765D000DEB300 /* GameOverScene.h */,
+				9F3B6EFA19C765D000DEB300 /* GameOverScene.m */,
 				9F7121EC19C46CC700412B22 /* Images.xcassets */,
 				9F7121D619C46CC700412B22 /* Supporting Files */,
 			);
@@ -400,6 +410,8 @@
 				9F3B6EF819C4C47800DEB300 /* MathUtils.m in Sources */,
 				9F7121E619C46CC700412B22 /* ViewController.m in Sources */,
 				9F7121E019C46CC700412B22 /* AppDelegate.m in Sources */,
+				9F3B6EFE19C76CDC00DEB300 /* MainMenuScene.m in Sources */,
+				9F3B6EFB19C765D000DEB300 /* GameOverScene.m in Sources */,
 				9F7121DC19C46CC700412B22 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

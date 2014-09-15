@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 extern CGPoint CGRectGetMidPoint(const CGRect rect);
+extern CGPoint CGSizeGetMidPoint(const CGSize size);
 extern CGPoint CGPointAdd(const CGPoint pt1, const CGPoint pt2);
 extern CGPoint CGPointSubtract(const CGPoint pt1, const CGPoint pt2);
 extern CGPoint CGPointMultiplyScalar(const CGPoint pt, const CGFloat s);
